@@ -5,9 +5,18 @@ public class Node : MonoBehaviour
 {
     public List<Node> neighbours = new List<Node>();
 
+    private Node parentNode;
+
     private void Start()
     {
         FindNeighbours();
+
+        EventManager.clearAllParentsEvent += ClearParent;   // Subscribe
+    }
+
+    private void OnDestroy()    // Unsubscribe
+    {
+        EventManager.clearAllParentsEvent -= ClearParent;
     }
 
     private void FindNeighbours()
@@ -62,5 +71,23 @@ public class Node : MonoBehaviour
                 }
             }
         }
+    }
+
+    // set parent   // The parents will be used to define the path
+    public void SetParentNode (Node _parent)
+    {
+        parentNode = _parent;
+    }
+
+    // get parent
+    public Node GetParentNode () 
+    { 
+        return parentNode;
+    }
+
+    // clear parent
+    private void ClearParent ()
+    {
+        parentNode = null;
     }
 }

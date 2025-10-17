@@ -652,9 +652,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startNode: {fileID: 1604439048}
-  targetNode: {fileID: 868319505}
+  targetNode: {fileID: 508334093}
   visitedNodes: []
   nodeQueue: []
+  nodePath: []
   redMat: {fileID: 2100000, guid: 9d4d6849d4db6cd44b33d545602f2ba5, type: 2}
   blueMat: {fileID: 2100000, guid: 2c685ce45be4be24085859c812af2a17, type: 2}
   greenMat: {fileID: 2100000, guid: 7ee832661b741a64484b7a919f2cdc18, type: 2}

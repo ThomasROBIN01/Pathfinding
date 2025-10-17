@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
+using JetBrains.Annotations;
 
 public class BreadthFirstSearch : MonoBehaviour
 {
@@ -16,6 +17,9 @@ public class BreadthFirstSearch : MonoBehaviour
 
     // List of nodes in queue
     [SerializeField] List<Node> nodeQueue = new List<Node>();
+
+    // Lisat of nades that will define the path
+    [SerializeField] List<Node> nodePath = new List<Node>();
 
     // create new instance of InputSystem_Actions
     // InputSystem_Actions can be found in the assets roots folder in Unity: we added a new one in Action Maps / UI / Submit 
@@ -55,6 +59,8 @@ public class BreadthFirstSearch : MonoBehaviour
 
     private void BreadthFirstAlgorithm()
     {
+        // call the 'clear all parents' event
+        EventManager.clearAllParentsEvent();
 
         // To visualisy represent the nodes affected, we will attribute some colours to the nodes:
 
@@ -66,16 +72,18 @@ public class BreadthFirstSearch : MonoBehaviour
         MeshRenderer targetNodeMeshRenderer = targetNode.GetComponent<MeshRenderer>();
         targetNodeMeshRenderer.material = greenMat;
 
+        // Clearing previous data
+        nodeQueue.Clear();
+        visitedNodes.Clear();
 
         // add 'start node' to nodeQueue
-
         nodeQueue.Add(startNode);
 
+
+        // enter while loop: 'have we found target node?'
         bool foundTarget = false;
 
-        
-        // enter while loop: 'have we found target node?'
-        while(foundTarget == false)
+        while (foundTarget == false)
         {            
             // 'pop' first item in nodeQueue if nodeQueue is not empty            
             if (nodeQueue.Count != 0)
@@ -93,6 +101,11 @@ public class BreadthFirstSearch : MonoBehaviour
                         if(!visitedNodes.Contains(activeNeighbour)) // if not in the visited queue
                         {
                             nodeQueue.Add(activeNeighbour);  // add neighbour to queue
+
+                            if (activeNeighbour.GetParentNode() == null)
+                            {
+                                activeNeighbour.SetParentNode(activeNode);
+                            }                            
                         }
                     }
 
@@ -107,9 +120,13 @@ public class BreadthFirstSearch : MonoBehaviour
                 }
                 else
                 {
-                    // turn a visited node in red once we confirm it isn't the target
-                    MeshRenderer visitedNodeRenderer = activeNode.GetComponent<MeshRenderer>();
-                    visitedNodeRenderer.material = redMat;
+                    if (activeNode != startNode)
+                    {
+                        // turn a visited node in red once we confirm it isn't the target
+                        MeshRenderer visitedNodeRenderer = activeNode.GetComponent<MeshRenderer>();
+                        visitedNodeRenderer.material = redMat;
+                    }
+
 
                     // if no: move 'active node' out of queue and into 'visitedNodes', then continue
                     nodeQueue.Remove(activeNode);
@@ -119,6 +136,48 @@ public class BreadthFirstSearch : MonoBehaviour
             }
 
         }
+
+        GeneratePath();
+
+    }
+
+    private void GeneratePath()
+    {
+        // clear the list of any data that has been generated previously
+        nodePath.Clear();
+
+        // add the target node to the 'nodePath' list
+        Node activeNode = targetNode;
+
+        // enter loop: while path isn't complete
+        bool pathComplete = false;
+
+        while (!pathComplete)
+        {
+            // add the active node to the 'nodePath' list
+            nodePath.Add(activeNode);
+
+            // To colour the path in yellow:
+            if (activeNode != startNode && targetNode)
+            {
+                MeshRenderer pathNodeRenderer = activeNode.GetComponent<MeshRenderer>();
+                pathNodeRenderer.material = yellowMat;
+            }
+
+
+            // check if active node is the starting node
+            if (activeNode == startNode)
+            {
+                // yes: kill the loop, path is complete
+                pathComplete = true;
+                continue;
+            }
+            else
+            {
+                // no: make parent node = active node
+                activeNode = activeNode.GetParentNode();
+            }
+        }       
 
     }
 

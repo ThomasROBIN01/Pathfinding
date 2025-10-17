@@ -12,6 +12,9 @@ public class BreadthFirstSearch : MonoBehaviour
     // target node / destination
     [SerializeField] Node targetNode;
 
+    // Highlighted node with mouse
+    [SerializeField] Node highlightedNode;
+
     // list of nodes that have been visited
     [SerializeField] List<Node> visitedNodes = new List<Node>();
 
@@ -48,6 +51,8 @@ public class BreadthFirstSearch : MonoBehaviour
         {
             BreadthFirstAlgorithm();
         }
+
+        DetectNodeUnderCursor();
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -56,6 +61,68 @@ public class BreadthFirstSearch : MonoBehaviour
         // BreadthFirstAlgorithm();
     }
 
+    private void SetStartingNode (Node _startNode)
+    {
+        startNode = _startNode;
+
+        // the start node in blue:
+        MeshRenderer startNodeMeshRenderer = startNode.GetComponent<MeshRenderer>();
+        startNodeMeshRenderer.material = blueMat;
+    }
+
+    private void SetTargetNode (Node _targetNode)
+    {
+        targetNode = _targetNode;
+
+        // the target node in green:
+        MeshRenderer targetNodeMeshRenderer = targetNode.GetComponent<MeshRenderer>();
+        targetNodeMeshRenderer.material = greenMat;
+    }
+
+    private void DetectNodeUnderCursor ()   // to assign start and target nodes on mouse clicks
+    {
+        // convert the screen position of the cursor (mouse) into world space
+        // draw a raycast from cursor to game environment
+        Ray rayFromCursorToGameQWorld = Camera.main.ScreenPointToRay(playerActions.UI.Point.ReadValue<Vector2>());  // ray from the cursor heading to the game environment
+
+        RaycastHit hit;
+
+        if (Physics.Raycast(rayFromCursorToGameQWorld, out hit))
+        {
+            // detect any object with 'Node' attached it under cursor
+            if (hit.collider.TryGetComponent(out Node _node))
+            {
+                // make that 'Node' the 'highlighted' node
+                highlightedNode = _node;
+            }
+            else
+            {
+                highlightedNode = null;
+            }
+        }
+        else
+        {
+            highlightedNode = null;     // if the raycast doesn't touch anything
+        }
+
+
+        // if highlighted node isn't null
+        if (highlightedNode != null)
+        {
+            // if left click: assign highligted node as starting node
+            if (playerActions.UI.SetStart.WasPressedThisFrame())
+            {
+                SetStartingNode(highlightedNode);
+            }
+            // if right click: assign highligted node as ending node
+            else if (playerActions.UI.SetTarget.WasPressedThisFrame())
+            {
+                SetTargetNode(highlightedNode);
+            }
+
+        }
+
+    }
 
     private void BreadthFirstAlgorithm()
     {
@@ -64,13 +131,13 @@ public class BreadthFirstSearch : MonoBehaviour
 
         // To visualisy represent the nodes affected, we will attribute some colours to the nodes:
 
-        // the start node in blue:
-        MeshRenderer startNodeMeshRenderer = startNode.GetComponent<MeshRenderer>();
-        startNodeMeshRenderer.material = blueMat;
+        //// the start node in blue:
+        //MeshRenderer startNodeMeshRenderer = startNode.GetComponent<MeshRenderer>();
+        //startNodeMeshRenderer.material = blueMat;
 
-        // the target node in green:
-        MeshRenderer targetNodeMeshRenderer = targetNode.GetComponent<MeshRenderer>();
-        targetNodeMeshRenderer.material = greenMat;
+        //// the target node in green:
+        //MeshRenderer targetNodeMeshRenderer = targetNode.GetComponent<MeshRenderer>();
+        //targetNodeMeshRenderer.material = greenMat;
 
         // Clearing previous data
         nodeQueue.Clear();
@@ -158,7 +225,7 @@ public class BreadthFirstSearch : MonoBehaviour
             nodePath.Add(activeNode);
 
             // To colour the path in yellow:
-            if (activeNode != startNode && targetNode)
+            if (activeNode != startNode && activeNode != targetNode)
             {
                 MeshRenderer pathNodeRenderer = activeNode.GetComponent<MeshRenderer>();
                 pathNodeRenderer.material = yellowMat;

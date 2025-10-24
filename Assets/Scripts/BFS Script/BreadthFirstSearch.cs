@@ -124,8 +124,11 @@ public class BreadthFirstSearch : MonoBehaviour
 
     }
 
+
     private void BreadthFirstAlgorithm()
     {
+        Debug.Log("BFS running");
+
         // call the 'clear all parents' event
         EventManager.clearAllParentsEvent();
 
